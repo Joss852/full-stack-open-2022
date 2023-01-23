@@ -1,3 +1,13 @@
+const Total = ({ parts }) => {
+  const total = parts.reduce((sum, part) => (sum += part.exercises), 0)
+  console.log(total)
+  return (
+    <p>
+      <b>total of {total} exercises</b>
+    </p>
+  )
+}
+
 const Part = ({ part, exercises }) => {
   return (
     <p>
@@ -25,6 +35,7 @@ const Course = ({ course }) => {
     <div>
       <Header course={course.name} />
       <Content parts={course.parts} />
+      <Total parts={course.parts} />
     </div>
   )
 }
@@ -52,7 +63,7 @@ const App = () => {
       {
         name: 'Redux',
         exercises: 11,
-        id: 3,
+        id: 4,
       },
     ],
   }

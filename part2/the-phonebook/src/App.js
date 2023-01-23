@@ -1,5 +1,56 @@
 import { useState } from 'react'
 
+const Person = ({ person }) => {
+  return (
+    <p>
+      {person.name}
+      {person.number}
+    </p>
+  )
+}
+
+const Persons = ({ persons }) => {
+  return (
+    <div>
+      {persons.map(person => (
+        <Person key={person.id} person={person} />
+      ))}
+    </div>
+  )
+}
+
+const PersonForm = ({ handleSubmit, ...props }) => {
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        name:{' '}
+        <input
+          value={props.newName}
+          onChange={e => props.setNewName(e.target.value)}
+        />
+      </div>
+      <div>
+        number:{' '}
+        <input
+          value={props.newNumber}
+          onChange={e => props.setNewNumber(e.target.value)}
+        />
+      </div>
+      <div>
+        <button type='submit'>add</button>
+      </div>
+    </form>
+  )
+}
+
+const Filter = ({ filter, handleChange }) => {
+  return (
+    <div>
+      filter shown with <input value={filter} onChange={e => handleChange(e)} />
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([
     { name: 'Arto Hellas', number: '040-123456', id: 1 },
@@ -8,20 +59,21 @@ const App = () => {
     { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 },
   ])
   const [newName, setNewName] = useState('')
-  const [newPhone, setNewPhone] = useState('')
+  const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
   const handleSubmit = e => {
     e.preventDefault()
     const person = {
       name: newName,
-      phone: newPhone,
+      number: newNumber,
+      id: persons.length + 1,
     }
 
     if (!persons.find(person => person.name === newName)) {
       setPersons(persons.concat(person))
       setNewName('')
-      setNewPhone('')
+      setNewNumber('')
       return
     }
 
@@ -38,28 +90,17 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      filter shown with <input value={filter} onChange={e => handleChange(e)} />
+      <Filter filter={filter} handleChange={handleChange} />
       <h2>add a new</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          name:{' '}
-          <input value={newName} onChange={e => setNewName(e.target.value)} />
-        </div>
-        <div>
-          phone:{' '}
-          <input value={newPhone} onChange={e => setNewPhone(e.target.value)} />
-        </div>
-        <div>
-          <button type='submit'>add</button>
-        </div>
-      </form>
+      <PersonForm
+        handleSubmit={handleSubmit}
+        newName={newName}
+        newNumber={newNumber}
+        setNewName={setNewName}
+        setNewNumber={setNewNumber}
+      />
       <h2>Numbers</h2>
-      {persons.map(person => (
-        <p key={person.id}>
-          {person.name}
-          {person.phone}
-        </p>
-      ))}
+      <Persons persons={persons} />
     </div>
   )
 }

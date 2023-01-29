@@ -1,6 +1,24 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
+const Alert = ({ message }) => {
+  const alertStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
+
+  if (message === null) {
+    return null
+  }
+
+  return <div style={alertStyle}>{message}</div>
+}
+
 const Person = ({ person, handleDelete }) => {
   return (
     <div>
@@ -57,13 +75,12 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [alertMessage, setAlertMessage] = useState(null)
 
   const fetchPersons = () => {
-    console.log('fetching persons...')
     personService
       .getAll()
       .then(initialPersons => {
-        console.log('persons fetched')
         setPersons(initialPersons)
       })
       .catch(error => {
@@ -82,7 +99,7 @@ const App = () => {
 
     const oldPerson = persons.find(person => person.name === newName)
 
-    if (oldPerson.number !== newNumber) {
+    if (oldPerson && oldPerson.number !== newNumber) {
       const confirm = window.confirm(
         `${newName} is already added to phonebook, replace the old number with a new one?`
       )
@@ -96,6 +113,7 @@ const App = () => {
                 person.id !== oldPerson.id ? person : returnedPerson
               )
             )
+            setAlertMessage(`Updated ${returnedPerson.name}`)
           })
           .catch(error => {
             alert(
@@ -110,6 +128,7 @@ const App = () => {
         .create(person)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
+          setAlertMessage(`Added ${returnedPerson.name}`)
           setNewName('')
           setNewNumber('')
         })
@@ -117,6 +136,10 @@ const App = () => {
           alert('Error creating person', error.message)
         })
     }
+
+    setTimeout(() => {
+      setAlertMessage(null)
+    }, 5000)
   }
 
   const handleChange = e => {
@@ -140,6 +163,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Alert message={alertMessage} />
       <Filter filter={filter} handleChange={handleChange} />
       <h2>add a new</h2>
       <PersonForm

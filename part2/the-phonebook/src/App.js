@@ -4,8 +4,7 @@ import axios from 'axios'
 const Person = ({ person }) => {
   return (
     <p>
-      {person.name}
-      {person.number}
+      {person.name} {person.number}
     </p>
   )
 }
@@ -73,13 +72,15 @@ const App = () => {
     const person = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1,
     }
 
     if (!persons.find(person => person.name === newName)) {
-      setPersons(persons.concat(person))
-      setNewName('')
-      setNewNumber('')
+      axios.post('http://localhost:3001/persons', person).then(response => {
+        setPersons(persons.concat(response.data))
+        setNewName('')
+        setNewNumber('')
+      })
+
       return
     }
 

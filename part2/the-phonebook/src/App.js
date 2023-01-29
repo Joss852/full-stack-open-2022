@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
-const Person = ({ person }) => {
+const Person = ({ person, handleDelete }) => {
   return (
-    <p>
+    <div>
       {person.name} {person.number}
-    </p>
+      <button onClick={() => handleDelete(person.id)}>Delete</button>
+    </div>
   )
 }
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons, handleDelete }) => {
   return (
     <div>
       {persons.map(person => (
-        <Person key={person.id} person={person} />
+        <Person key={person.id} person={person} handleDelete={handleDelete} />
       ))}
     </div>
   )
@@ -99,6 +100,17 @@ const App = () => {
     setPersons(filtered)
   }
 
+  const handleDelete = id => {
+    const { name } = persons.find(person => person.id === id)
+    const confirm = window.confirm(`delete ${name}? `)
+
+    if (confirm) {
+      personService.deletePerson(id).then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -112,7 +124,7 @@ const App = () => {
         setNewNumber={setNewNumber}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} />
+      <Persons persons={persons} handleDelete={handleDelete} />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const Person = ({ person }) => {
   return (
@@ -59,10 +59,15 @@ const App = () => {
 
   const fetchPersons = () => {
     console.log('fetching persons...')
-    axios.get('http://localhost:3001/persons').then(response => {
-      console.log('persons fetched')
-      setPersons(response.data)
-    })
+    personService
+      .getAll()
+      .then(initialPersons => {
+        console.log('persons fetched')
+        setPersons(initialPersons)
+      })
+      .catch(error => {
+        alert('Error fetching persons', error.message)
+      })
   }
 
   useEffect(fetchPersons, [])
@@ -75,8 +80,8 @@ const App = () => {
     }
 
     if (!persons.find(person => person.name === newName)) {
-      axios.post('http://localhost:3001/persons', person).then(response => {
-        setPersons(persons.concat(response.data))
+      personService.create(person).then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
       })

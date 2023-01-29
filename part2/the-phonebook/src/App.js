@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
-const Alert = ({ message }) => {
-  const alertStyle = {
+const Alert = ({ alert }) => {
+  let alertStyle = {
     color: 'green',
     background: 'lightgrey',
     fontSize: 20,
@@ -12,11 +12,15 @@ const Alert = ({ message }) => {
     marginBottom: 10,
   }
 
-  if (message === null) {
+  if (alert.message === null) {
     return null
   }
 
-  return <div style={alertStyle}>{message}</div>
+  if (alert.type === 'error') {
+    alertStyle = { ...alertStyle, color: 'red' }
+  }
+
+  return <div style={alertStyle}>{alert.message}</div>
 }
 
 const Person = ({ person, handleDelete }) => {
@@ -75,7 +79,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
-  const [alertMessage, setAlertMessage] = useState(null)
+  const [alert, setAlert] = useState({ message: null, type: null })
 
   const fetchPersons = () => {
     personService
@@ -84,7 +88,7 @@ const App = () => {
         setPersons(initialPersons)
       })
       .catch(error => {
-        alert('Error fetching persons', error.message)
+        setAlert({ message: 'Error fetching persons', type: 'error' })
       })
   }
 
@@ -113,13 +117,16 @@ const App = () => {
                 person.id !== oldPerson.id ? person : returnedPerson
               )
             )
-            setAlertMessage(`Updated ${returnedPerson.name}`)
+            setAlert({
+              message: `Updated ${returnedPerson.name}`,
+              type: 'success',
+            })
           })
           .catch(error => {
-            alert(
-              `The person '${newName}' was already deleted from server`,
-              error.message
-            )
+            setAlert({
+              message: `Information of' ${newName}' has already been removed from server`,
+              type: 'error',
+            })
             setPersons(persons.filter(person => person.id !== oldPerson.id))
           })
       }
@@ -128,7 +135,7 @@ const App = () => {
         .create(person)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          setAlertMessage(`Added ${returnedPerson.name}`)
+          setAlert({ message: `Added ${returnedPerson.name}`, type: 'success' })
           setNewName('')
           setNewNumber('')
         })
@@ -138,7 +145,7 @@ const App = () => {
     }
 
     setTimeout(() => {
-      setAlertMessage(null)
+      setAlert({ message: null, type: null })
     }, 5000)
   }
 
@@ -163,7 +170,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Alert message={alertMessage} />
+      <Alert alert={alert} />
       <Filter filter={filter} handleChange={handleChange} />
       <h2>add a new</h2>
       <PersonForm

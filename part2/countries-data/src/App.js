@@ -37,30 +37,35 @@ const Country = ({ country }) => {
   )
 }
 
-const CountryElement = ({ name }) => {
-  return <li>{name}</li>
+const CountryElement = ({ name, handleClick }) => {
+  return (
+    <li>
+      {name} <button onClick={() => handleClick(name)}>show</button>
+    </li>
+  )
 }
 
-const CountryList = ({ countries }) => {
+const CountryList = ({ countries, handleClick }) => {
   return (
     <ul>
       {countries.map(country => (
         <CountryElement
           key={country.name.official}
           name={country.name.common}
+          handleClick={handleClick}
         />
       ))}
     </ul>
   )
 }
 
-const Countries = ({ countries }) => {
+const Countries = ({ countries, handleClick }) => {
   if (countries.length > 10) {
     return <div>Too many matches, specify another filter</div>
   }
 
   if (countries.length <= 10 && countries.length > 1) {
-    return <CountryList countries={countries} />
+    return <CountryList countries={countries} handleClick={handleClick} />
   }
 
   if (countries.length !== 0) {
@@ -92,13 +97,18 @@ const App = () => {
 
   useEffect(fetchData, [])
 
+  const handleClick = name => {
+    const find = countries.find(country => country.name.common === name)
+    setCountries([find])
+  }
+
   return (
     <div>
       <label>
         find countries
         <input value={value} onChange={handleChange} />
       </label>
-      <Countries countries={countries} />
+      <Countries countries={countries} handleClick={handleClick} />
     </div>
   )
 }

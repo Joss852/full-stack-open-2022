@@ -1,6 +1,25 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const CountryWeather = ({ weather }) => {
+  if (Object.keys(weather).length === 0) {
+    return
+  }
+
+  const altImg = `${weather.weather.description} icon`
+  const srcImg = `http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`
+  const temperature = (weather.main.temp - 273.15).toFixed(2)
+
+  return (
+    <div>
+      <h2>Wheater</h2>
+      <p>Temperature: {temperature} Celcius</p>
+      <img alt={altImg} src={srcImg} />
+      <p>Wind: {weather.wind.speed} m/s</p>
+    </div>
+  )
+}
+
 const CountryFlag = ({ flagUrl, altImg }) => {
   return <img alt={altImg} src={flagUrl} />
 }
@@ -21,7 +40,7 @@ const LanguageList = ({ languages }) => {
   )
 }
 
-const Country = ({ country }) => {
+const Country = ({ country, weather }) => {
   return (
     <div>
       <h1>{country.name.common}</h1>
@@ -33,6 +52,7 @@ const Country = ({ country }) => {
         flagUrl={country.flags.png}
         altImg={`${country.name.common} flag`}
       />
+      <CountryWeather weather={weather} />
     </div>
   )
 }
@@ -59,7 +79,7 @@ const CountryList = ({ countries, handleClick }) => {
   )
 }
 
-const Countries = ({ countries, handleClick }) => {
+const Countries = ({ countries, handleClick, weather }) => {
   if (countries.length > 10) {
     return <div>Too many matches, specify another filter</div>
   }
@@ -69,7 +89,7 @@ const Countries = ({ countries, handleClick }) => {
   }
 
   if (countries.length !== 0) {
-    return <Country country={countries[0]} />
+    return <Country country={countries[0]} weather={weather} />
   }
 }
 
@@ -77,6 +97,16 @@ const App = () => {
   const [value, setValue] = useState('')
   const [countries, setCountries] = useState([])
   const [allCountries, setAllCountries] = useState([])
+  const [weather, setWeather] = useState({})
+
+  const fetchWeather = ({ lat, lon }) => {
+    axios
+      .get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.REACT_APP_WEATHER_KEY}`
+      )
+      .then(response => setWeather(response.data))
+      .catch(error => console.error(error.message))
+  }
 
   const handleChange = e => {
     setValue(e.target.value)
@@ -86,6 +116,13 @@ const App = () => {
       return name.includes(value)
     })
     setCountries(filter)
+    if (filter.length === 1) {
+      const coordintes = {
+        lat: countries[0].latlng[0],
+        lon: countries[0].latlng[1],
+      }
+      fetchWeather(coordintes)
+    }
   }
 
   const fetchData = () => {
@@ -100,6 +137,11 @@ const App = () => {
   const handleClick = name => {
     const find = countries.find(country => country.name.common === name)
     setCountries([find])
+    const coordintes = {
+      lat: countries[0].latlng[0],
+      lon: countries[0].latlng[1],
+    }
+    fetchWeather(coordintes)
   }
 
   return (
@@ -108,7 +150,11 @@ const App = () => {
         find countries
         <input value={value} onChange={handleChange} />
       </label>
-      <Countries countries={countries} handleClick={handleClick} />
+      <Countries
+        countries={countries}
+        handleClick={handleClick}
+        weather={weather}
+      />
     </div>
   )
 }

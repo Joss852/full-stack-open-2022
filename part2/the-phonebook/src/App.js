@@ -140,7 +140,10 @@ const App = () => {
           setNewNumber('')
         })
         .catch(error => {
-          alert('Error creating person', error.message)
+          setAlert({
+            message: error.response.data.error,
+            type: 'error',
+          })
         })
     }
 

@@ -39,30 +39,31 @@ const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
   }
 
   return (
-    <div style={blogStyle} data-testid='blog' className='blog'>
+    <div style={blogStyle} data-testid="blog" className="blog">
       <div>
         <span>
           {blog.title} - {blog.author}
         </span>
-        <button id='viewBtn' onClick={toggleVisibility}>
+        <button id="viewBtn" onClick={toggleVisibility}>
           {buttonLabel}
         </button>
       </div>
       {visible && (
-        <div data-testid='blog-details' id='blog-details'>
+        <div data-testid="blog-details" id="blog-details">
           <div>{blog.url}</div>
           <div>
             <span>likes {blog.likes}</span>
-            <button id='likeBtn' onClick={handleClick}>
+            <button id="likeBtn" onClick={handleClick}>
               like
             </button>
           </div>
           <div>{blog.user.name}</div>
           {loggedUser.username === blog.user.username && (
             <button
-              id='removeBtn'
+              id="removeBtn"
               onClick={() => handleRemove(blog)}
-              style={buttonStyle}>
+              style={buttonStyle}
+            >
               remove
             </button>
           )}

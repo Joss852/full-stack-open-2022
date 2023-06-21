@@ -14,7 +14,7 @@ const App = () => {
 
   const blogFormRef = useRef()
 
-  const handleLogin = async credentials => {
+  const handleLogin = async (credentials) => {
     try {
       const user = await loginService.login(credentials)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
@@ -40,7 +40,7 @@ const App = () => {
     window.localStorage.clear()
   }
 
-  const handleCreate = async formContent => {
+  const handleCreate = async (formContent) => {
     try {
       const newBlog = await blogService.create(formContent)
       setBlogs(blogs.concat(newBlog))
@@ -68,10 +68,10 @@ const App = () => {
       const updatedBlog = await blogService.update(blog.id, { likes })
       setBlogs(
         blogs
-          .map(b =>
-            b.id === updatedBlog.id ? { ...b, likes: updatedBlog.likes } : b
+          .map((b) =>
+            b.id === updatedBlog.id ? { ...b, likes: updatedBlog.likes } : b,
           )
-          .sort((a, b) => b.likes - a.likes)
+          .sort((a, b) => b.likes - a.likes),
       )
     } catch (error) {
       setAlert({
@@ -84,10 +84,10 @@ const App = () => {
     }
   }
 
-  const handleDelete = async id => {
+  const handleDelete = async (id) => {
     try {
       await blogService.remove(id)
-      setBlogs(blogs.filter(blog => blog.id !== id))
+      setBlogs(blogs.filter((blog) => blog.id !== id))
       setAlert({
         message: 'Blog deleted successfully',
         type: 'success',
@@ -116,7 +116,7 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    blogService.getAll().then(blogs => {
+    blogService.getAll().then((blogs) => {
       const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
       setBlogs(sortedBlogs)
     })
@@ -137,16 +137,16 @@ const App = () => {
           <Alert alert={alert} />
           <p>
             {user.name} logged in{' '}
-            <button onClick={handleLogout} id='logoutBtn'>
+            <button onClick={handleLogout} id="logoutBtn">
               logout
             </button>
           </p>
 
-          <Togglable buttonLabel='create new blog' ref={blogFormRef}>
+          <Togglable buttonLabel="create new blog" ref={blogFormRef}>
             <BlogForm onSubmit={handleCreate} />
           </Togglable>
 
-          {blogs.map(blog => (
+          {blogs.map((blog) => (
             <Blog
               key={blog.id}
               blog={blog}

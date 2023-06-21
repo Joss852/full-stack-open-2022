@@ -20,7 +20,7 @@ const Alert = ({ alert }) => {
   }
 
   return (
-    <div id='alert' style={alertStyle}>
+    <div id="alert" style={alertStyle}>
       {alert.message}
     </div>
   )

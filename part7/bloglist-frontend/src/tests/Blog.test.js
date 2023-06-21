@@ -64,7 +64,7 @@ describe('Blog', () => {
     const mockHandler = jest.fn()
 
     render(
-      <Blog blog={blog} loggedUser={loggedUser} handleLike={mockHandler} />
+      <Blog blog={blog} loggedUser={loggedUser} handleLike={mockHandler} />,
     )
 
     const user = userEvent.setup()

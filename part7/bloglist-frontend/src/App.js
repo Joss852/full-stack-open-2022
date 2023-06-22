@@ -6,11 +6,15 @@ import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import { useSelector, useDispatch } from 'react-redux'
+import { setNotificationWithTimeout } from './reducers/notificationReducer'
 
 const App = () => {
+  const dispatch = useDispatch()
+
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [alert, setAlert] = useState({ message: null, type: null })
+  const alert = useSelector(state => state.notification)
 
   const blogFormRef = useRef()
 
@@ -20,18 +24,9 @@ const App = () => {
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
       setUser(user)
-      setAlert({ message: `Welcome ${user.name}`, type: 'success' })
-      setTimeout(() => {
-        setAlert({ message: null, type: null })
-      }, 2000)
+      dispatch(setNotificationWithTimeout(`Welcome ${user.name}`, 'success', 2))
     } catch (error) {
-      setAlert({
-        message: 'Wrong username or password',
-        type: 'error',
-      })
-      setTimeout(() => {
-        setAlert({ message: null, type: null })
-      }, 2000)
+      dispatch(setNotificationWithTimeout('Wrong username or password', 'error', 2))
     }
   }
 
@@ -45,21 +40,9 @@ const App = () => {
       const newBlog = await blogService.create(formContent)
       setBlogs(blogs.concat(newBlog))
       blogFormRef.current.toggleVisibility()
-      setAlert({
-        message: `A new blog ${newBlog.title} by ${newBlog.author} added`,
-        type: 'success',
-      })
-      setTimeout(() => {
-        setAlert({ message: null, type: null })
-      }, 2000)
+      dispatch(setNotificationWithTimeout(`A new blog ${newBlog.title} by ${newBlog.author} added`, 'success', 2))
     } catch (error) {
-      setAlert({
-        message: 'Error adding new blog, try again later',
-        type: 'error',
-      })
-      setTimeout(() => {
-        setAlert({ message: null, type: null })
-      }, 2000)
+      dispatch(setNotificationWithTimeout('Error adding new blog, try again later', 'error', 2))
     }
   }
 
@@ -74,13 +57,7 @@ const App = () => {
           .sort((a, b) => b.likes - a.likes),
       )
     } catch (error) {
-      setAlert({
-        message: 'Error updating blog, try again later',
-        type: 'error',
-      })
-      setTimeout(() => {
-        setAlert({ message: null, type: null })
-      }, 2000)
+      dispatch(setNotificationWithTimeout('Error updating blog, try again later', 'error', 2))
     }
   }
 
@@ -88,21 +65,9 @@ const App = () => {
     try {
       await blogService.remove(id)
       setBlogs(blogs.filter((blog) => blog.id !== id))
-      setAlert({
-        message: 'Blog deleted successfully',
-        type: 'success',
-      })
-      setTimeout(() => {
-        setAlert({ message: null, type: null })
-      }, 2000)
+      dispatch(setNotificationWithTimeout('Blog deleted successfully', 'success', 2))
     } catch (error) {
-      setAlert({
-        message: 'Error updating blog, try again later',
-        type: 'error',
-      })
-      setTimeout(() => {
-        setAlert({ message: null, type: null })
-      }, 2000)
+      dispatch(setNotificationWithTimeout('Error deleting blog, try again later', 'error', 2))
     }
   }
 

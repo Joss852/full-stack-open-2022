@@ -8,11 +8,12 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import { useSelector, useDispatch } from 'react-redux'
 import { setNotificationWithTimeout } from './reducers/notificationReducer'
+import { initializeBlogs, createBlog } from './reducers/blogReducer'
 
 const App = () => {
   const dispatch = useDispatch()
 
-  const [blogs, setBlogs] = useState([])
+  const blogs = useSelector(state => state.blog)
   const [user, setUser] = useState(null)
   const alert = useSelector(state => state.notification)
 
@@ -37,10 +38,9 @@ const App = () => {
 
   const handleCreate = async (formContent) => {
     try {
-      const newBlog = await blogService.create(formContent)
-      setBlogs(blogs.concat(newBlog))
+      dispatch(createBlog(formContent))
       blogFormRef.current.toggleVisibility()
-      dispatch(setNotificationWithTimeout(`A new blog ${newBlog.title} by ${newBlog.author} added`, 'success', 2))
+      dispatch(setNotificationWithTimeout(`A new blog ${formContent.title} by ${formContent.author} added`, 'success', 2))
     } catch (error) {
       dispatch(setNotificationWithTimeout('Error adding new blog, try again later', 'error', 2))
     }
@@ -48,14 +48,15 @@ const App = () => {
 
   const handleLike = async (blog, likes) => {
     try {
-      const updatedBlog = await blogService.update(blog.id, { likes })
-      setBlogs(
-        blogs
-          .map((b) =>
-            b.id === updatedBlog.id ? { ...b, likes: updatedBlog.likes } : b,
-          )
-          .sort((a, b) => b.likes - a.likes),
-      )
+      console.log({ blog, likes })
+      // const updatedBlog = await blogService.update(blog.id, { likes })
+      // setBlogs(
+      //   blogs
+      //     .map((b) =>
+      //       b.id === updatedBlog.id ? { ...b, likes: updatedBlog.likes } : b,
+      //     )
+      //     .sort((a, b) => b.likes - a.likes),
+      // )
     } catch (error) {
       dispatch(setNotificationWithTimeout('Error updating blog, try again later', 'error', 2))
     }
@@ -64,7 +65,7 @@ const App = () => {
   const handleDelete = async (id) => {
     try {
       await blogService.remove(id)
-      setBlogs(blogs.filter((blog) => blog.id !== id))
+      // setBlogs(blogs.filter((blog) => blog.id !== id))
       dispatch(setNotificationWithTimeout('Blog deleted successfully', 'success', 2))
     } catch (error) {
       dispatch(setNotificationWithTimeout('Error deleting blog, try again later', 'error', 2))
@@ -81,10 +82,7 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => {
-      const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
-      setBlogs(sortedBlogs)
-    })
+    dispatch(initializeBlogs())
   }, [user])
 
   return (

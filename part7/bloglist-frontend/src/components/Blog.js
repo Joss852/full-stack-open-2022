@@ -3,7 +3,6 @@ import { useState } from 'react'
 
 const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
   const [visible, setVisible] = useState(false)
-  const [likes, setLikes] = useState(blog.likes)
 
   const buttonLabel = visible ? 'hide' : 'view'
   const blogStyle = {
@@ -28,8 +27,7 @@ const Blog = ({ blog, handleLike, handleDelete, loggedUser }) => {
   }
 
   const handleClick = () => {
-    setLikes(likes + 1)
-    handleLike(blog, likes + 1)
+    handleLike(blog)
   }
 
   const handleRemove = ({ id, author, title }) => {

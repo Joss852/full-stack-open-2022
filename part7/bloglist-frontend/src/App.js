@@ -8,7 +8,7 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import { useSelector, useDispatch } from 'react-redux'
 import { setNotificationWithTimeout } from './reducers/notificationReducer'
-import { initializeBlogs, createBlog } from './reducers/blogReducer'
+import { initializeBlogs, createBlog, like, remove } from './reducers/blogReducer'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -46,26 +46,18 @@ const App = () => {
     }
   }
 
-  const handleLike = async (blog, likes) => {
+  const handleLike = async blog => {
     try {
-      console.log({ blog, likes })
-      // const updatedBlog = await blogService.update(blog.id, { likes })
-      // setBlogs(
-      //   blogs
-      //     .map((b) =>
-      //       b.id === updatedBlog.id ? { ...b, likes: updatedBlog.likes } : b,
-      //     )
-      //     .sort((a, b) => b.likes - a.likes),
-      // )
+      dispatch(like(blog))
+      dispatch(setNotificationWithTimeout(`You liked ${blog.title} by ${blog.author}`, 'success', 2))
     } catch (error) {
       dispatch(setNotificationWithTimeout('Error updating blog, try again later', 'error', 2))
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     try {
-      await blogService.remove(id)
-      // setBlogs(blogs.filter((blog) => blog.id !== id))
+      dispatch(remove(id))
       dispatch(setNotificationWithTimeout('Blog deleted successfully', 'success', 2))
     } catch (error) {
       dispatch(setNotificationWithTimeout('Error deleting blog, try again later', 'error', 2))

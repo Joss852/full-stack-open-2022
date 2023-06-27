@@ -6,12 +6,14 @@ import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import { useDispatch, useSelector } from 'react-redux'
-import { initializeBlogs, createBlog, like, remove } from './reducers/blogReducer'
+import { like, remove } from './reducers/blogReducer'
 import { login, logout, setUser } from './reducers/userReducer'
-
+import { useQuery, useQueryClient, useMutation } from 'react-query'
 import { useNotification, useNotificationDispatch, setNotification, removeNotification } from './context/NotificationContext'
 
 const App = () => {
+  const queryClient = useQueryClient()
+  const createBlogMutation = useMutation(blogService.create)
   const dispatch = useDispatch()
   const notificationDispatch = useNotificationDispatch()
 
@@ -20,7 +22,9 @@ const App = () => {
     setTimeout(() => notificationDispatch(removeNotification()), timeout * 1000)
   }
 
-  const blogs = useSelector(state => state.blog)
+  const result = useQuery('blogs', blogService.getAll)
+  const blogs = result.data
+
   const user = useSelector(state => state.user)
   const alert = useNotification()
 
@@ -41,7 +45,12 @@ const App = () => {
 
   const handleCreate = formContent => {
     try {
-      dispatch(createBlog(formContent))
+      createBlogMutation.mutate(formContent, {
+        onSuccess: (newBlog) => {
+          const oldBlogs = queryClient.getQueryData('blogs')
+          queryClient.setQueryData('blogs', oldBlogs.concat(newBlog))
+        }
+      })
       blogFormRef.current.toggleVisibility()
       setNotificationWithTimeout(`A new blog ${formContent.title} by ${formContent.author} added`, 'success', 2)
     } catch (error) {
@@ -77,10 +86,10 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    if (!user) return
-
-    dispatch(initializeBlogs())
+    queryClient.invalidateQueries('blogs')
   }, [user])
+
+  if (result.isLoading) return <div>Loading...</div>
 
   return (
     <div>

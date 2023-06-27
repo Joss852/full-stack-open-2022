@@ -5,6 +5,7 @@ import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import UsersPage from './components/UsersPage'
+import UserInfo from './components/UserInfo'
 import { blogService, userService, setToken } from './services'
 import { useQuery, useQueryClient, useMutation } from 'react-query'
 import { useNotification, useNotificationDispatch, setNotification, removeNotification } from './context/NotificationContext'
@@ -119,16 +120,15 @@ const App = () => {
 
   return (
     <Router>
-      <h2>blogs</h2>
-      <Alert alert={alert} />
-      <p>
-        {user.name} logged in{' '}
-        <button onClick={handleLogout} id="logoutBtn">
-              logout
-        </button>
-      </p>
+      <div>
+        <h2>blogs</h2>
+        <Alert alert={alert} />
+        <p>{user.name} logged in</p>
+        <button onClick={handleLogout} id="logoutBtn">logout</button>
+      </div>
 
       <Routes>
+        <Route path="/users/:id" element={<UserInfo />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/" element={(
           <div>

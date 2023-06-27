@@ -1,14 +1,13 @@
-import { useQuery, useQueryClient } from 'react-query'
+import { useQuery } from 'react-query'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import { userService } from '../services'
 
 const UsersPage = () => {
-  const queryClient = useQueryClient()
+  const userQuery = useQuery('users', userService.getAll, { refetchOnWindowFocus: false })
 
-  const { data, error, isLoading } = useQuery('users', userService.getAll, { refetchOnWindowFocus: false })
+  if (userQuery.isLoading) return <h4>Loading users...</h4>
 
-  if (isLoading) return <h4>Loading users...</h4>
-
-  if(error) return <h4>Error loading users: {error.message}</h4>
+  if(userQuery.error) return <h4>Error loading users: {userQuery.error.message}</h4>
 
   return (
     <div>
@@ -21,10 +20,12 @@ const UsersPage = () => {
           </tr>
         </thead>
         <tbody>
-          {data.map(user => {
+          {userQuery.data.map(user => {
             return (
               <tr key={user.id}>
-                <td>{user.name}</td>
+                <td>
+                  <Link to={`/users/${user.id}`}>{user.name}</Link>
+                </td>
                 <td>{user.blogs.length}</td>
               </tr>
             )

@@ -5,15 +5,16 @@ import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import UsersPage from './components/UsersPage'
+import BlogPage from './components/BlogPage'
 import UserInfo from './components/UserInfo'
 import { blogService, userService, setToken } from './services'
 import { useQuery, useQueryClient, useMutation } from 'react-query'
-import { useNotification, useNotificationDispatch, setNotification, removeNotification } from './context/NotificationContext'
 import { useUser, useUserDispatch, setUser, removeUser } from './context/UserContext'
 import {
   BrowserRouter as Router,
   Routes, Route, Link
 } from 'react-router-dom'
+import { removeNotification, setNotification, useNotification, useNotificationDispatch } from './context/NotificationContext'
 
 const App = () => {
   const queryClient = useQueryClient()
@@ -24,26 +25,8 @@ const App = () => {
     }
   })
 
-  const updateBlogMutation = useMutation(blogService.update, {
-    onSuccess: (newBlog) => {
-      const oldBlogs = queryClient.getQueryData('blogs')
-      const newBlogs = oldBlogs.map((b) =>
-        b.id === newBlog.id ? { ...b, likes: newBlog.likes } : b,
-      )
-        .sort((a, b) => b.likes - a.likes)
-
-      queryClient.setQueryData('blogs', newBlogs)
-    },
-  })
-
-  const removeBlogMutation = useMutation(blogService.remove, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('blogs')
-    },
-  })
-
-  const notificationDispatch = useNotificationDispatch()
   const userDispatch =  useUserDispatch()
+  const notificationDispatch = useNotificationDispatch()
 
   const setNotificationWithTimeout = (message, type, timeout) => {
     notificationDispatch(setNotification(message, type))
@@ -85,24 +68,6 @@ const App = () => {
     }
   }
 
-  const handleLike = blog => {
-    try {
-      updateBlogMutation.mutate({ ...blog, likes: blog.likes + 1 })
-      setNotificationWithTimeout(`You liked ${blog.title} by ${blog.author}`, 'success', 2)
-    } catch (error) {
-      setNotificationWithTimeout('Error updating blog, try again later', 'error', 2)
-    }
-  }
-
-  const handleDelete = id => {
-    try {
-      removeBlogMutation.mutate(id)
-      setNotificationWithTimeout('Blog deleted successfully', 'success', 2)
-    } catch (error) {
-      setNotificationWithTimeout('Error deleting blog, try again later', 'error', 2)
-    }
-  }
-
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -120,14 +85,16 @@ const App = () => {
 
   return (
     <Router>
-      <div>
-        <h2>blogs</h2>
-        <Alert alert={alert} />
-        <p>{user.name} logged in</p>
-        <button onClick={handleLogout} id="logoutBtn">logout</button>
-      </div>
-
+      {user !== null && (
+        <div>
+          <h2>blogs</h2>
+          <Alert alert={alert} />
+          <p>{user.name} logged in</p>
+          <button onClick={handleLogout} id="logoutBtn">logout</button>
+        </div>
+      )}
       <Routes>
+        <Route path="/blogs/:id" element={<BlogPage loggedUser={user}/>} />
         <Route path="/users/:id" element={<UserInfo />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/" element={(
@@ -149,9 +116,6 @@ const App = () => {
                   <Blog
                     key={blog.id}
                     blog={blog}
-                    handleLike={handleLike}
-                    handleDelete={handleDelete}
-                    loggedUser={user}
                   />
                 ))}
               </div>

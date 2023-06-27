@@ -5,10 +5,10 @@ import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
-import { useDispatch, useSelector } from 'react-redux'
-import { login, logout, setUser } from './reducers/userReducer'
+import userService from './services/login'
 import { useQuery, useQueryClient, useMutation } from 'react-query'
 import { useNotification, useNotificationDispatch, setNotification, removeNotification } from './context/NotificationContext'
+import { useUser, useUserDispatch, setUser, removeUser } from './context/UserContext'
 
 const App = () => {
   const queryClient = useQueryClient()
@@ -37,8 +37,8 @@ const App = () => {
     },
   })
 
-  const dispatch = useDispatch()
   const notificationDispatch = useNotificationDispatch()
+  const userDispatch =  useUserDispatch()
 
   const setNotificationWithTimeout = (message, type, timeout) => {
     notificationDispatch(setNotification(message, type))
@@ -48,14 +48,17 @@ const App = () => {
   const result = useQuery('blogs', blogService.getAll, { refetchOnWindowFocus: false })
   const blogs = result.data
 
-  const user = useSelector(state => state.user)
+  const user = useUser()
   const alert = useNotification()
 
   const blogFormRef = useRef()
 
-  const handleLogin = credentials => {
+  const handleLogin = async credentials => {
     try {
-      dispatch(login(credentials))
+      const loggedUser = await userService.login(credentials)
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(loggedUser))
+      blogService.setToken(loggedUser.token)
+      userDispatch(setUser(credentials))
       setNotificationWithTimeout('Logged in successfully', 'success', 2)
     } catch (error) {
       setNotificationWithTimeout('Wrong username or password', 'error', 2)
@@ -63,7 +66,8 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    dispatch(logout())
+    window.localStorage.removeItem('loggedBlogappUser')
+    userDispatch(removeUser())
   }
 
   const handleCreate = formContent => {
@@ -99,7 +103,7 @@ const App = () => {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       blogService.setToken(user.token)
-      dispatch(setUser(user))
+      userDispatch(setUser(user))
     }
   }, [])
 

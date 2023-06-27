@@ -6,14 +6,37 @@ import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import { useDispatch, useSelector } from 'react-redux'
-import { like, remove } from './reducers/blogReducer'
 import { login, logout, setUser } from './reducers/userReducer'
 import { useQuery, useQueryClient, useMutation } from 'react-query'
 import { useNotification, useNotificationDispatch, setNotification, removeNotification } from './context/NotificationContext'
 
 const App = () => {
   const queryClient = useQueryClient()
-  const createBlogMutation = useMutation(blogService.create)
+  const createBlogMutation = useMutation(blogService.create, {
+    onSuccess: (newBlog) => {
+      const oldBlogs = queryClient.getQueryData('blogs')
+      queryClient.setQueryData('blogs', oldBlogs.concat(newBlog))
+    }
+  })
+
+  const updateBlogMutation = useMutation(blogService.update, {
+    onSuccess: (newBlog) => {
+      const oldBlogs = queryClient.getQueryData('blogs')
+      const newBlogs = oldBlogs.map((b) =>
+        b.id === newBlog.id ? { ...b, likes: newBlog.likes } : b,
+      )
+        .sort((a, b) => b.likes - a.likes)
+
+      queryClient.setQueryData('blogs', newBlogs)
+    },
+  })
+
+  const removeBlogMutation = useMutation(blogService.remove, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('blogs')
+    },
+  })
+
   const dispatch = useDispatch()
   const notificationDispatch = useNotificationDispatch()
 
@@ -22,7 +45,7 @@ const App = () => {
     setTimeout(() => notificationDispatch(removeNotification()), timeout * 1000)
   }
 
-  const result = useQuery('blogs', blogService.getAll)
+  const result = useQuery('blogs', blogService.getAll, { refetchOnWindowFocus: false })
   const blogs = result.data
 
   const user = useSelector(state => state.user)
@@ -45,12 +68,7 @@ const App = () => {
 
   const handleCreate = formContent => {
     try {
-      createBlogMutation.mutate(formContent, {
-        onSuccess: (newBlog) => {
-          const oldBlogs = queryClient.getQueryData('blogs')
-          queryClient.setQueryData('blogs', oldBlogs.concat(newBlog))
-        }
-      })
+      createBlogMutation.mutate(formContent)
       blogFormRef.current.toggleVisibility()
       setNotificationWithTimeout(`A new blog ${formContent.title} by ${formContent.author} added`, 'success', 2)
     } catch (error) {
@@ -60,7 +78,7 @@ const App = () => {
 
   const handleLike = blog => {
     try {
-      dispatch(like(blog))
+      updateBlogMutation.mutate({ ...blog, likes: blog.likes + 1 })
       setNotificationWithTimeout(`You liked ${blog.title} by ${blog.author}`, 'success', 2)
     } catch (error) {
       setNotificationWithTimeout('Error updating blog, try again later', 'error', 2)
@@ -69,7 +87,7 @@ const App = () => {
 
   const handleDelete = id => {
     try {
-      dispatch(remove(id))
+      removeBlogMutation.mutate(id)
       setNotificationWithTimeout('Blog deleted successfully', 'success', 2)
     } catch (error) {
       setNotificationWithTimeout('Error deleting blog, try again later', 'error', 2)

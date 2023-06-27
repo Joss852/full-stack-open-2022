@@ -21,12 +21,11 @@ const create = (newObject) => {
   return request.then((response) => response.data)
 }
 
-const update = (id, newObject) => {
+const update = (newObject) => {
   const config = {
     headers: { Authorization: token },
   }
-
-  const request = axios.put(`${baseUrl}/${id}`, newObject, config)
+  const request = axios.put(`${baseUrl}/${newObject.id}`, newObject, config)
   return request.then((response) => response.data)
 }
 

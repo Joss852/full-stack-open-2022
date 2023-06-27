@@ -17,7 +17,7 @@ export const login = user => {
   return async dispatch => {
     const loggedUser = await userService.login(user)
     window.localStorage.setItem('loggedBlogappUser', JSON.stringify(loggedUser))
-    blogService.setToken(user.token)
+    blogService.setToken(loggedUser.token)
     dispatch(setUser(loggedUser))
   }
 }

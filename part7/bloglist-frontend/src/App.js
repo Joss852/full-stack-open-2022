@@ -5,26 +5,33 @@ import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
-import { useSelector, useDispatch } from 'react-redux'
-import { setNotificationWithTimeout } from './reducers/notificationReducer'
+import { useDispatch, useSelector } from 'react-redux'
 import { initializeBlogs, createBlog, like, remove } from './reducers/blogReducer'
 import { login, logout, setUser } from './reducers/userReducer'
 
+import { useNotification, useNotificationDispatch, setNotification, removeNotification } from './context/NotificationContext'
+
 const App = () => {
   const dispatch = useDispatch()
+  const notificationDispatch = useNotificationDispatch()
+
+  const setNotificationWithTimeout = (message, type, timeout) => {
+    notificationDispatch(setNotification(message, type))
+    setTimeout(() => notificationDispatch(removeNotification()), timeout * 1000)
+  }
 
   const blogs = useSelector(state => state.blog)
   const user = useSelector(state => state.user)
-  const alert = useSelector(state => state.notification)
+  const alert = useNotification()
 
   const blogFormRef = useRef()
 
-  const handleLogin = async (credentials) => {
+  const handleLogin = credentials => {
     try {
       dispatch(login(credentials))
-      dispatch(setNotificationWithTimeout('Welcome again', 'success', 2))
+      setNotificationWithTimeout('Logged in successfully', 'success', 2)
     } catch (error) {
-      dispatch(setNotificationWithTimeout('Wrong username or password', 'error', 2))
+      setNotificationWithTimeout('Wrong username or password', 'error', 2)
     }
   }
 
@@ -32,31 +39,31 @@ const App = () => {
     dispatch(logout())
   }
 
-  const handleCreate = async (formContent) => {
+  const handleCreate = formContent => {
     try {
       dispatch(createBlog(formContent))
       blogFormRef.current.toggleVisibility()
-      dispatch(setNotificationWithTimeout(`A new blog ${formContent.title} by ${formContent.author} added`, 'success', 2))
+      setNotificationWithTimeout(`A new blog ${formContent.title} by ${formContent.author} added`, 'success', 2)
     } catch (error) {
-      dispatch(setNotificationWithTimeout('Error adding new blog, try again later', 'error', 2))
+      setNotificationWithTimeout('Error adding new blog, try again later', 'error', 2)
     }
   }
 
-  const handleLike = async blog => {
+  const handleLike = blog => {
     try {
       dispatch(like(blog))
-      dispatch(setNotificationWithTimeout(`You liked ${blog.title} by ${blog.author}`, 'success', 2))
+      setNotificationWithTimeout(`You liked ${blog.title} by ${blog.author}`, 'success', 2)
     } catch (error) {
-      dispatch(setNotificationWithTimeout('Error updating blog, try again later', 'error', 2))
+      setNotificationWithTimeout('Error updating blog, try again later', 'error', 2)
     }
   }
 
-  const handleDelete = async id => {
+  const handleDelete = id => {
     try {
       dispatch(remove(id))
-      dispatch(setNotificationWithTimeout('Blog deleted successfully', 'success', 2))
+      setNotificationWithTimeout('Blog deleted successfully', 'success', 2)
     } catch (error) {
-      dispatch(setNotificationWithTimeout('Error deleting blog, try again later', 'error', 2))
+      setNotificationWithTimeout('Error deleting blog, try again later', 'error', 2)
     }
   }
 

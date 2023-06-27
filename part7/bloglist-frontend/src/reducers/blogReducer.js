@@ -16,7 +16,7 @@ const blogSlice = createSlice({
         .sort((a, b) => b.likes - a.likes)
     },
     deleteBlog: (state, action) => {
-      state.filter(b => b.id !== action.payload)
+      return state.filter(b => b.id !== action.payload)
     }
   }
 })

@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import userService from '../services/login'
-import blogService from '../services/blogs'
+import appServices from '../services/'
 
 const userSlice = createSlice({
   name: 'user',
@@ -15,9 +14,9 @@ export const { setUser, removeUser } = userSlice.actions
 
 export const login = user => {
   return async dispatch => {
-    const loggedUser = await userService.login(user)
+    const loggedUser = await appServices.userService.login(user)
     window.localStorage.setItem('loggedBlogappUser', JSON.stringify(loggedUser))
-    blogService.setToken(loggedUser.token)
+    appServices.setToken(loggedUser.token)
     dispatch(setUser(loggedUser))
   }
 }

@@ -4,11 +4,15 @@ import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
-import blogService from './services/blogs'
-import userService from './services/login'
+import UsersPage from './components/UsersPage'
+import { blogService, userService, setToken } from './services'
 import { useQuery, useQueryClient, useMutation } from 'react-query'
 import { useNotification, useNotificationDispatch, setNotification, removeNotification } from './context/NotificationContext'
 import { useUser, useUserDispatch, setUser, removeUser } from './context/UserContext'
+import {
+  BrowserRouter as Router,
+  Routes, Route, Link
+} from 'react-router-dom'
 
 const App = () => {
   const queryClient = useQueryClient()
@@ -57,9 +61,9 @@ const App = () => {
     try {
       const loggedUser = await userService.login(credentials)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(loggedUser))
-      blogService.setToken(loggedUser.token)
-      userDispatch(setUser(credentials))
-      setNotificationWithTimeout('Logged in successfully', 'success', 2)
+      setToken(loggedUser.token)
+      userDispatch(setUser(loggedUser))
+      setNotificationWithTimeout(`Welcome back ${loggedUser.name}`, 'success', 2)
     } catch (error) {
       setNotificationWithTimeout('Wrong username or password', 'error', 2)
     }
@@ -102,7 +106,7 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      blogService.setToken(user.token)
+      setToken(user.token)
       userDispatch(setUser(user))
     }
   }, [])
@@ -114,41 +118,49 @@ const App = () => {
   if (result.isLoading) return <div>Loading...</div>
 
   return (
-    <div>
-      {user === null && (
-        <div>
-          <h2>Log in to application</h2>
-          <Alert alert={alert} />
-          <LoginForm handleLogin={handleLogin} />
-        </div>
-      )}
-      {user !== null && (
-        <div>
-          <h2>blogs</h2>
-          <Alert alert={alert} />
-          <p>
-            {user.name} logged in{' '}
-            <button onClick={handleLogout} id="logoutBtn">
+    <Router>
+      <h2>blogs</h2>
+      <Alert alert={alert} />
+      <p>
+        {user.name} logged in{' '}
+        <button onClick={handleLogout} id="logoutBtn">
               logout
-            </button>
-          </p>
+        </button>
+      </p>
 
-          <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-            <BlogForm onSubmit={handleCreate} />
-          </Togglable>
+      <Routes>
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/" element={(
+          <div>
+            {user === null && (
+              <div>
+                <h2>Log in to application</h2>
+                <Alert alert={alert} />
+                <LoginForm handleLogin={handleLogin} />
+              </div>
+            )}
+            {user !== null && (
+              <div>
+                <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+                  <BlogForm onSubmit={handleCreate} />
+                </Togglable>
 
-          {blogs.map((blog) => (
-            <Blog
-              key={blog.id}
-              blog={blog}
-              handleLike={handleLike}
-              handleDelete={handleDelete}
-              loggedUser={user}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+                {blogs.map((blog) => (
+                  <Blog
+                    key={blog.id}
+                    blog={blog}
+                    handleLike={handleLike}
+                    handleDelete={handleDelete}
+                    loggedUser={user}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )} />
+      </Routes>
+
+    </Router>
   )
 }
 

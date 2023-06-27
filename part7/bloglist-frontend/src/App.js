@@ -1,39 +1,35 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import Alert from './components/Alert'
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
-import loginService from './services/login'
 import { useSelector, useDispatch } from 'react-redux'
 import { setNotificationWithTimeout } from './reducers/notificationReducer'
 import { initializeBlogs, createBlog, like, remove } from './reducers/blogReducer'
+import { login, logout, setUser } from './reducers/userReducer'
 
 const App = () => {
   const dispatch = useDispatch()
 
   const blogs = useSelector(state => state.blog)
-  const [user, setUser] = useState(null)
+  const user = useSelector(state => state.user)
   const alert = useSelector(state => state.notification)
 
   const blogFormRef = useRef()
 
   const handleLogin = async (credentials) => {
     try {
-      const user = await loginService.login(credentials)
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
-      blogService.setToken(user.token)
-      setUser(user)
-      dispatch(setNotificationWithTimeout(`Welcome ${user.name}`, 'success', 2))
+      dispatch(login(credentials))
+      dispatch(setNotificationWithTimeout('Welcome again', 'success', 2))
     } catch (error) {
       dispatch(setNotificationWithTimeout('Wrong username or password', 'error', 2))
     }
   }
 
   const handleLogout = () => {
-    setUser(null)
-    window.localStorage.clear()
+    dispatch(logout())
   }
 
   const handleCreate = async (formContent) => {
@@ -69,11 +65,13 @@ const App = () => {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       blogService.setToken(user.token)
-      setUser(user)
+      dispatch(setUser(user))
     }
   }, [])
 
   useEffect(() => {
+    if (!user) return
+
     dispatch(initializeBlogs())
   }, [user])
 

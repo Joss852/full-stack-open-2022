@@ -32,6 +32,7 @@ const App = () => {
     <Router>
       {user !== null && <Navbar />}
       <Alert alert={alert} />
+      <h1>Blog app</h1>
       <Routes>
         <Route path="/blogs/:id" element={<BlogPage loggedUser={user}/>} />
         <Route path="/users/:id" element={<UserInfo />} />

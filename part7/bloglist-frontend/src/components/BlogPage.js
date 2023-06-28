@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { blogService } from '../services'
 import { useNotificationDispatch, setNotification, removeNotification } from '../context/NotificationContext'
@@ -12,6 +12,11 @@ const BlogPage = ({ loggedUser }) => {
   const blog = blogs.find(b => b.id === id)
 
   if (!blog) return null
+
+  const query = useQuery('comments', () => blogService.getComments(id), {
+    refetchOnWindowFocus: false
+  })
+  const comments = query.data || []
 
   const notificationDispatch = useNotificationDispatch()
 
@@ -81,9 +86,15 @@ const BlogPage = ({ loggedUser }) => {
           onClick={() => handleDelete(blog.id)}
           style={buttonStyle}
         >
-              remove
+          remove
         </button>
       )}
+      <h3>comments</h3>
+      {query.isFetching && <div>Loading comments...</div>}
+      {query.error && <div>Error trying to load comments. {query.error.message}</div>}
+      <ul>
+        {comments.map(c => <li key={c.id}>{c.content}</li>)}
+      </ul>
     </div>
   )
 }

@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { blogService } from '../services'
+import { blogService, commentService } from '../services'
 import { useNotificationDispatch, setNotification, removeNotification } from '../context/NotificationContext'
+import CommentsForm from './CommentsForm'
 
 const BlogPage = ({ loggedUser }) => {
   const queryClient = useQueryClient()
@@ -13,7 +14,7 @@ const BlogPage = ({ loggedUser }) => {
 
   if (!blog) return null
 
-  const query = useQuery('comments', () => blogService.getComments(id), {
+  const query = useQuery('comments', () => commentService.getComments(id), {
     refetchOnWindowFocus: false
   })
   const comments = query.data || []
@@ -90,6 +91,7 @@ const BlogPage = ({ loggedUser }) => {
         </button>
       )}
       <h3>comments</h3>
+      <CommentsForm blogId={blog.id}/>
       {query.isFetching && <div>Loading comments...</div>}
       {query.error && <div>Error trying to load comments. {query.error.message}</div>}
       <ul>

@@ -1,28 +1,15 @@
 import PropTypes from 'prop-types'
+import { Alert as Notification } from '@mui/material'
 
 const Alert = ({ alert }) => {
-  let alertStyle = {
-    color: 'green',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  }
-
   if (alert.message === null) {
     return null
   }
 
-  if (alert.type === 'error') {
-    alertStyle = { ...alertStyle, color: 'red' }
-  }
-
   return (
-    <div id="alert" style={alertStyle}>
+    <Notification severity={alert.type}>
       {alert.message}
-    </div>
+    </Notification>
   )
 }
 

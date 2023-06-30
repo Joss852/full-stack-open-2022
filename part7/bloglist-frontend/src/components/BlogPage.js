@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { blogService, commentService } from '../services'
 import { useNotificationDispatch, setNotification, removeNotification } from '../context/NotificationContext'
+import { Box, Card, CardActions, CardContent, Button, Typography, Link, Paper } from '@mui/material'
 import CommentsForm from './CommentsForm'
+import LikeIcon from '@mui/icons-material/ThumbUpOutlined'
+import DeleteIcon from '@mui/icons-material/DeleteOutlined'
 
 const BlogPage = ({ loggedUser }) => {
   const queryClient = useQueryClient()
@@ -65,39 +68,83 @@ const BlogPage = ({ loggedUser }) => {
     }
   }
 
-  const buttonStyle = {
-    color: 'white',
-    background: 'red',
-    fontSize: 15,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 5,
-    marginBottom: 5,
-  }
-
   return (
-    <div>
-      <h2>{blog.title}</h2>
-      <Link to={blog.url}>{blog.url}</Link>
-      <div>{blog.likes} likes <button onClick={() => handleLike(blog)}>like</button></div>
-      <div>added by {blog.author}</div>
-      {loggedUser.username === blog.user.username && (
-        <button
-          id="removeBtn"
-          onClick={() => handleDelete(blog.id)}
-          style={buttonStyle}
-        >
-          remove
-        </button>
-      )}
-      <h3>comments</h3>
+    <Box sx={{ padding: 2 }}>
+      <Card>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            {blog.title}
+          </Typography>
+          <Typography sx={{ mb: 1.5 }} color="text.secondary">
+            {blog.author}
+          </Typography>
+          <Typography variant="body2" component={Link} href={blog.url} underline="hover">
+            Read blog
+          </Typography>
+          <Typography variant="body2" component="div">
+            {blog.likes} likes
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <Button
+            size='small'
+            onClick={() => handleLike(blog)}
+            startIcon={<LikeIcon />}
+          >
+            Like
+          </Button>
+          {loggedUser.username === blog.user.username && (
+            <Button
+              id="removeBtn"
+              onClick={() => handleDelete(blog.id)}
+              size='small'
+              variant='contained'
+              color='error'
+              startIcon={<DeleteIcon />}
+            >
+              Remove
+            </Button>
+          )}
+        </CardActions>
+      </Card>
+
+      <Typography variant="h5" component="div" sx={{ mt: 2 }}>
+        Comments
+      </Typography>
       <CommentsForm blogId={blog.id}/>
-      {query.isFetching && <div>Loading comments...</div>}
-      {query.error && <div>Error trying to load comments. {query.error.message}</div>}
-      <ul>
-        {comments.map(c => <li key={c.id}>{c.content}</li>)}
-      </ul>
-    </div>
+      {query.isFetching && (
+        <Typography variant="subtitle2" component="div">
+          Loading comments...
+        </Typography>
+      )}
+
+      {query.error && (
+        <Typography variant="subtitle2" component="div">
+          Error loading comments
+        </Typography>
+      )}
+
+      {!query.isFetching && comments.length === 0 && (
+        <Typography variant="subtitle2" component="div">
+          No comments yet
+        </Typography>
+      )}
+
+      {!query.isFetching && comments.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          {comments.map(c => (
+            <Paper
+              key={c.id}
+              elevation={0}
+              sx={{ padding: 2, mb: 1, backgroundColor: '#f0f2f5', borderRadius: 4 }}
+            >
+              {c.content}
+            </Paper>
+          ))}
+        </Box>
+      )}
+
+    </Box>
   )
 }
 

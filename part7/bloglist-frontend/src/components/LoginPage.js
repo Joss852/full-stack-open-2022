@@ -3,6 +3,7 @@ import { removeNotification, setNotification, useNotificationDispatch } from '..
 import { setUser, useUserDispatch } from '../context/UserContext'
 import { setToken, userService } from '../services'
 import LoginForm from './LoginForm'
+import { Box, Paper, Typography } from '@mui/material'
 
 const LoginPage = () => {
   const notificationDispatch = useNotificationDispatch()
@@ -20,7 +21,7 @@ const LoginPage = () => {
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(loggedUser))
       setToken(loggedUser.token)
       userDispatch(setUser(loggedUser))
-      setNotificationWithTimeout(`Welcome back ${loggedUser.name}`, 'success', 2)
+      setNotificationWithTimeout(`Welcome back ${loggedUser.name}`, 'info', 2)
       navigate('/')
     } catch (error) {
       setNotificationWithTimeout('Wrong username or password', 'error', 2)
@@ -28,10 +29,17 @@ const LoginPage = () => {
   }
 
   return (
-    <div>
-      <h2>Log in to application</h2>
-      <LoginForm handleLogin={handleLogin} />
-    </div>
+    <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 2, backgroundColor: '#f0f2f5', padding: '3rem', textAlign: 'center' }}>
+      <Paper sx={{ padding: '2rem', border: '1px solid #dddfe2',  }} elevation={8}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          BlogApp
+        </Typography>
+        <Typography variant="h6" component="span" gutterBottom>
+          Log into BlogApp
+        </Typography>
+        <LoginForm handleLogin={handleLogin}/>
+      </Paper>
+    </Box>
   )
 }
 

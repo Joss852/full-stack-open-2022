@@ -19,7 +19,11 @@ const create = (newObject) => {
     headers: { Authorization: token },
   }
 
-  const request = axios.post(`/api/blogs/${newObject.id}/comments`, newObject, config)
+  const request = axios.post(
+    `/api/blogs/${newObject.id}/comments`,
+    newObject,
+    config
+  )
   return request.then((response) => response.data)
 }
 

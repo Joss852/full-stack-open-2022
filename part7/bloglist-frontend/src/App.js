@@ -13,6 +13,8 @@ import {
 import HomePage from './components/HomePage'
 import { setToken } from './services'
 import { useNotification } from './context/NotificationContext'
+import { Container } from '@mui/material'
+import './index.css'
 
 const App = () => {
   const userDispatch =  useUserDispatch()
@@ -29,18 +31,20 @@ const App = () => {
   }, [])
 
   return (
-    <Router>
-      {user !== null && <Navbar />}
-      <Alert alert={alert} />
-      <h1>Blog app</h1>
-      <Routes>
-        <Route path="/blogs/:id" element={<BlogPage loggedUser={user}/>} />
-        <Route path="/users/:id" element={<UserInfo />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/" element={user ? <HomePage /> : <Navigate replace to="/login" />} />
-      </Routes>
-    </Router>
+    <Container>
+      <Router>
+        {user && <Navbar />}
+        <Alert alert={alert} />
+        <Routes>
+          <Route path="/blogs/:id" element={<BlogPage loggedUser={user}/>} />
+          <Route path="/blogs" element={<Navigate replace to="/" />} />
+          <Route path="/users/:id" element={<UserInfo />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/" element={user ? <HomePage /> : <Navigate replace to="/login" />} />
+        </Routes>
+      </Router>
+    </Container>
   )
 }
 

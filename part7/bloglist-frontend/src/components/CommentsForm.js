@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { useMutation, useQueryClient } from 'react-query'
 import { commentService } from '../services'
 import { removeNotification, setNotification, useNotificationDispatch } from '../context/NotificationContext'
+import { Input, IconButton, Box, Tooltip, InputAdornment } from '@mui/material'
+import SendIcon from '@mui/icons-material/Send'
 
 const CommentsForm = ({ blogId }) => {
   const queryClient = useQueryClient()
   const notificationDispatch = useNotificationDispatch()
+  const [comment, setComment] = useState('')
 
   const setNotificationWithTimeout = (message, type, timeout) => {
     notificationDispatch(setNotification(message, type))
@@ -21,16 +25,31 @@ const CommentsForm = ({ blogId }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    const comment = event.target.content.value
-    event.target.content.value = ''
-    const newComment = { blogId, content: comment }
-    commentMutation.mutate(newComment)
+    commentMutation.mutate({ id: blogId, content: comment })
+    setComment('')
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" name='content'/>
-      <button type="submit">add comment</button>
+      <Box mb={2}>
+        <Input
+          variant='filled'
+          name='content'
+          placeholder='Write a comment...'
+          value={comment}
+          onChange={({ target }) => setComment(target.value)}
+          endAdornment={
+            <InputAdornment position="end">
+              <Tooltip title='Comment'>
+                <IconButton color="primary" aria-label="comment" onClick={handleSubmit}>
+                  <SendIcon />
+                </IconButton>
+              </Tooltip>
+            </InputAdornment>
+          }
+          fullWidth
+        />
+      </Box>
     </form>
   )
 }

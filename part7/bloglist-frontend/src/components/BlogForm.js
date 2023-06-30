@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import { useState } from 'react'
+import { Button, TextField, Box } from '@mui/material'
 
 const BlogForm = ({ onSubmit }) => {
   const [blog, setBlog] = useState({ title: '', author: '', url: '' })
@@ -7,6 +8,7 @@ const BlogForm = ({ onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     onSubmit(blog)
+    setBlog({ title: '', author: '', url: '' })
   }
 
   const handleChange = (target) => {
@@ -14,48 +16,43 @@ const BlogForm = ({ onSubmit }) => {
   }
 
   return (
-    <div data-testid="create-form">
-      <h2>create new blog</h2>
+    <Box data-testid="create-form">
       <form onSubmit={handleSubmit}>
-        <div>
-          title:
-          <input
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <TextField
             id="title"
             type="text"
             name="title"
             value={blog.title}
             onChange={({ target }) => handleChange(target)}
-            placeholder="type title here"
+            label="Title"
+            variant='standard'
           />
-        </div>
-        <div>
-          author:
-          <input
+          <TextField
             id="author"
             type="text"
             name="author"
             value={blog.author}
             onChange={({ target }) => handleChange(target)}
-            placeholder="type author here"
+            label="Author"
+            variant='standard'
           />
-        </div>
-        <div>
-          url:
-          <input
+          <TextField
             id="url"
             type="text"
             name="url"
             value={blog.url}
             onChange={({ target }) => handleChange(target)}
-            placeholder="type url here"
+            label="URL"
+            variant='standard'
           />
-        </div>
 
-        <button id="createBtn" type="submit">
-          save
-        </button>
+          <Button id="createBtn" type="submit" variant='contained'>
+            save
+          </Button>
+        </Box>
       </form>
-    </div>
+    </Box>
   )
 }
 

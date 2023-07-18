@@ -4,6 +4,8 @@
   "description": "implementation of GraphQL in backend for a small library",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "JM",
@@ -14,5 +16,8 @@
     "graphql": "^16.7.1",
     "mongoose": "^7.3.4",
     "mongoose-unique-validator": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

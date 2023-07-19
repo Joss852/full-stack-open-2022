@@ -17,14 +17,16 @@ const Categories = ({ books, setGenre }) => {
       {genres.map(genre => (
           <button key={genre} onClick={() => setGenre(genre)}>{genre}</button>
       ))}
-        <button onClick={() => setGenre('all genres')}>all genres</button>
+        <button onClick={() => setGenre(null)}>all genres</button>
     </div>
   )
 }
 
 const Books = (props) => {
-  const [genre, setGenre] = useState('all genres')
-  const result = useQuery(ALL_BOOKS)
+  const [genre, setGenre] = useState(null)
+  const result = useQuery(ALL_BOOKS, {
+    variables: { genre }
+  })
 
   if (!props.show) {
     return null
@@ -35,13 +37,17 @@ const Books = (props) => {
   }
 
   const books = result.data.allBooks
-  const filteredBooks = books.filter(book => genre === 'all genres' || book.genres.includes(genre))
+  const filteredBooks = books.filter(book => !genre || book.genres.includes(genre))
 
   return (
     <div>
       <h2>books</h2>
 
-      <span>in genre: <strong>{genre}</strong></span>
+      {genre && (
+        <span>in genre: 
+          <strong>{genre}</strong>
+        </span>
+      )}
 
       <table>
         <tbody>

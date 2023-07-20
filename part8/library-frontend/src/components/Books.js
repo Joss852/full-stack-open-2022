@@ -17,13 +17,13 @@ const Categories = ({ books, setGenre }) => {
       {genres.map(genre => (
           <button key={genre} onClick={() => setGenre(genre)}>{genre}</button>
       ))}
-        <button onClick={() => setGenre(null)}>all genres</button>
+        <button onClick={() => setGenre('')}>all genres</button>
     </div>
   )
 }
 
 const Books = (props) => {
-  const [genre, setGenre] = useState(null)
+  const [genre, setGenre] = useState('')
   const result = useQuery(ALL_BOOKS, {
     variables: { genre }
   })
@@ -37,7 +37,6 @@ const Books = (props) => {
   }
 
   const books = result.data.allBooks
-  const filteredBooks = books.filter(book => !genre || book.genres.includes(genre))
 
   return (
     <div>
@@ -56,7 +55,7 @@ const Books = (props) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {filteredBooks.map((a) => (
+          {books.map((a) => (
             <tr key={a.id}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>
